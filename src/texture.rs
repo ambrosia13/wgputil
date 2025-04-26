@@ -129,3 +129,10 @@ pub fn copy(encoder: &mut wgpu::CommandEncoder, src: &wgpu::Texture, dst: &wgpu:
 
     encoder.copy_texture_to_texture(src.as_image_copy(), dst.as_image_copy(), src.size());
 }
+
+pub fn sample_type(
+    device: &wgpu::Device,
+    texture: &wgpu::Texture,
+) -> Option<wgpu::TextureSampleType> {
+    texture.format().sample_type(None, Some(device.features()))
+}

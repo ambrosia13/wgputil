@@ -1,5 +1,73 @@
 use std::num::NonZero;
 
+pub fn bind_buffer_uniform(buffer: &wgpu::Buffer) -> BindingEntry<'_> {
+    BindingEntry {
+        binding_type: wgpu::BindingType::Buffer {
+            ty: wgpu::BufferBindingType::Uniform,
+            has_dynamic_offset: false,
+            min_binding_size: None,
+        },
+        count: None,
+        resource: buffer.as_entire_binding(),
+    }
+}
+
+pub fn bind_buffer_storage(buffer: &wgpu::Buffer, read_only: bool) -> BindingEntry<'_> {
+    BindingEntry {
+        binding_type: wgpu::BindingType::Buffer {
+            ty: wgpu::BufferBindingType::Storage { read_only },
+            has_dynamic_offset: false,
+            min_binding_size: None,
+        },
+        count: None,
+        resource: buffer.as_entire_binding(),
+    }
+}
+
+pub fn bind_texture_view(
+    view: &wgpu::TextureView,
+    sample_type: wgpu::TextureSampleType,
+    view_dimension: wgpu::TextureViewDimension,
+) -> BindingEntry<'_> {
+    BindingEntry {
+        binding_type: wgpu::BindingType::Texture {
+            sample_type,
+            view_dimension,
+            multisampled: false,
+        },
+        count: None,
+        resource: wgpu::BindingResource::TextureView(view),
+    }
+}
+
+pub fn bind_texture_storage(
+    view: &wgpu::TextureView,
+    format: wgpu::TextureFormat,
+    view_dimension: wgpu::TextureViewDimension,
+    access: wgpu::StorageTextureAccess,
+) -> BindingEntry<'_> {
+    BindingEntry {
+        binding_type: wgpu::BindingType::StorageTexture {
+            access,
+            format,
+            view_dimension,
+        },
+        count: None,
+        resource: wgpu::BindingResource::TextureView(view),
+    }
+}
+
+pub fn bind_sampler(
+    sampler: &wgpu::Sampler,
+    binding_type: wgpu::SamplerBindingType,
+) -> BindingEntry<'_> {
+    BindingEntry {
+        binding_type: wgpu::BindingType::Sampler(binding_type),
+        count: None,
+        resource: wgpu::BindingResource::Sampler(sampler),
+    }
+}
+
 /// Entry for creating a linked [`wgpu::BindGroupLayoutEntry`] and [`wgpu::BindGroupEntry`].
 pub struct BindingEntry<'a> {
     pub binding_type: wgpu::BindingType,
