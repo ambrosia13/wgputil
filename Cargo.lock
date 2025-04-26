@@ -2520,7 +2520,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "wgpu_util"
+name = "wgputil"
 version = "0.1.0"
 dependencies = [
  "bytemuck",
