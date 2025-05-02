@@ -4,10 +4,10 @@ use winit::window::Window;
 
 #[derive(Clone)]
 pub struct GpuHandle {
-    pub instance: Arc<wgpu::Instance>,
-    pub adapter: Arc<wgpu::Adapter>,
-    pub device: Arc<wgpu::Device>,
-    pub queue: Arc<wgpu::Queue>,
+    pub instance: wgpu::Instance,
+    pub adapter: wgpu::Adapter,
+    pub device: wgpu::Device,
+    pub queue: wgpu::Queue,
 }
 
 pub struct FrameRecord {
@@ -86,11 +86,6 @@ impl SurfaceState {
         };
 
         surface.configure(&device, &config);
-
-        let instance = Arc::new(instance);
-        let adapter = Arc::new(adapter);
-        let device = Arc::new(device);
-        let queue = Arc::new(queue);
 
         Self {
             surface,
