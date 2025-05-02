@@ -15,7 +15,7 @@ pub struct FrameRecord {
     pub surface_texture: wgpu::SurfaceTexture,
 }
 
-pub struct WindowState {
+pub struct SurfaceState {
     pub surface: wgpu::Surface<'static>,
     pub config: wgpu::SurfaceConfiguration,
 
@@ -25,7 +25,7 @@ pub struct WindowState {
     pub gpu_handle: GpuHandle,
 }
 
-impl WindowState {
+impl SurfaceState {
     pub async fn new(window: Arc<Window>, features: wgpu::Features, limits: wgpu::Limits) -> Self {
         let viewport_size = window.inner_size();
 
