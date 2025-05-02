@@ -46,15 +46,13 @@ impl SurfaceState {
             .unwrap();
 
         let (device, queue) = adapter
-            .request_device(
-                &wgpu::DeviceDescriptor {
-                    label: None,
-                    required_features: features,
-                    required_limits: limits,
-                    memory_hints: wgpu::MemoryHints::Performance,
-                },
-                None,
-            )
+            .request_device(&wgpu::DeviceDescriptor {
+                label: None,
+                required_features: features,
+                required_limits: limits,
+                memory_hints: wgpu::MemoryHints::Performance,
+                trace: wgpu::Trace::Off,
+            })
             .await
             .unwrap();
 

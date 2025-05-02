@@ -24,7 +24,7 @@ pub fn bind_buffer_storage(buffer: &wgpu::Buffer, read_only: bool) -> BindingEnt
     }
 }
 
-pub fn bind_texture_view(
+pub fn bind_texture(
     view: &wgpu::TextureView,
     sample_type: wgpu::TextureSampleType,
     view_dimension: wgpu::TextureViewDimension,
@@ -40,7 +40,23 @@ pub fn bind_texture_view(
     }
 }
 
-pub fn bind_texture_storage(
+pub fn bind_textures<'a>(
+    views: &'a [&wgpu::TextureView],
+    sample_type: wgpu::TextureSampleType,
+    view_dimension: wgpu::TextureViewDimension,
+) -> BindingEntry<'a> {
+    BindingEntry {
+        binding_type: wgpu::BindingType::Texture {
+            sample_type,
+            view_dimension,
+            multisampled: false,
+        },
+        count: Some(views.len()),
+        resource: wgpu::BindingResource::TextureViewArray(views),
+    }
+}
+
+pub fn bind_storage_texture(
     view: &wgpu::TextureView,
     format: wgpu::TextureFormat,
     view_dimension: wgpu::TextureViewDimension,
@@ -57,6 +73,23 @@ pub fn bind_texture_storage(
     }
 }
 
+pub fn bind_storage_textures<'a>(
+    views: &'a [&wgpu::TextureView],
+    format: wgpu::TextureFormat,
+    view_dimension: wgpu::TextureViewDimension,
+    access: wgpu::StorageTextureAccess,
+) -> BindingEntry<'a> {
+    BindingEntry {
+        binding_type: wgpu::BindingType::StorageTexture {
+            access,
+            format,
+            view_dimension,
+        },
+        count: Some(views.len()),
+        resource: wgpu::BindingResource::TextureViewArray(views),
+    }
+}
+
 pub fn bind_sampler(
     sampler: &wgpu::Sampler,
     binding_type: wgpu::SamplerBindingType,
@@ -65,6 +98,17 @@ pub fn bind_sampler(
         binding_type: wgpu::BindingType::Sampler(binding_type),
         count: None,
         resource: wgpu::BindingResource::Sampler(sampler),
+    }
+}
+
+pub fn bind_samplers<'a>(
+    samplers: &'a [&wgpu::Sampler],
+    binding_type: wgpu::SamplerBindingType,
+) -> BindingEntry<'a> {
+    BindingEntry {
+        binding_type: wgpu::BindingType::Sampler(binding_type),
+        count: Some(samplers.len()),
+        resource: wgpu::BindingResource::SamplerArray(samplers),
     }
 }
 
