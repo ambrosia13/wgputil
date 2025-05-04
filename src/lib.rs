@@ -48,7 +48,7 @@ pub struct SurfaceState {
     pub viewport_size: winit::dpi::PhysicalSize<u32>,
     pub window: Arc<Window>,
 
-    pub gpu_handle: GpuHandle,
+    pub gpu: GpuHandle,
 }
 
 impl SurfaceState {
@@ -116,7 +116,7 @@ impl SurfaceState {
             config,
             viewport_size,
             window,
-            gpu_handle: GpuHandle {
+            gpu: GpuHandle {
                 instance,
                 adapter,
                 device,
@@ -126,8 +126,7 @@ impl SurfaceState {
     }
 
     pub fn reconfigure_surface(&self) {
-        self.surface
-            .configure(&self.gpu_handle.device, &self.config);
+        self.surface.configure(&self.gpu.device, &self.config);
     }
 
     pub fn resize(&mut self, new_size: winit::dpi::PhysicalSize<u32>) {
@@ -140,12 +139,12 @@ impl SurfaceState {
     }
 
     pub fn begin_frame(&self) -> Result<FrameRecord, wgpu::SurfaceError> {
-        let encoder =
-            self.gpu_handle
-                .device
-                .create_command_encoder(&wgpu::CommandEncoderDescriptor {
-                    label: Some("Frame Encoder"),
-                });
+        let encoder = self
+            .gpu
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("Frame Encoder"),
+            });
 
         let surface_texture = self.surface.get_current_texture()?;
 
@@ -156,7 +155,7 @@ impl SurfaceState {
     }
 
     pub fn finish_frame(&self, frame: FrameRecord) {
-        self.gpu_handle
+        self.gpu
             .queue
             .submit(std::iter::once(frame.encoder.finish()));
 
