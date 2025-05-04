@@ -6,7 +6,6 @@ use winit::window::Window;
 pub mod binding;
 pub mod buffer;
 pub mod shader;
-pub mod state;
 pub mod texture;
 
 pub(crate) mod util;
