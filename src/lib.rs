@@ -5,6 +5,7 @@ use winit::window::Window;
 
 pub mod binding;
 pub mod buffer;
+pub mod profile;
 pub mod shader;
 pub mod texture;
 
