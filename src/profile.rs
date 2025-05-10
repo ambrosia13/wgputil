@@ -3,7 +3,7 @@ use std::{
     time::Duration,
 };
 
-use crate::GpuHandle;
+use crate::{Error, GpuHandle};
 
 pub struct TimeQuery {
     started: bool,
@@ -95,7 +95,7 @@ impl TimeQuery {
         );
     }
 
-    pub fn read(&self, gpu: &GpuHandle) -> Duration {
+    pub fn read(&self, gpu: &GpuHandle) -> Result<Duration, Error> {
         let mut encoder = gpu.device.create_command_encoder(&Default::default());
 
         // resolve with temporary command encoder instead of the frame encoder
@@ -126,13 +126,13 @@ impl TimeQuery {
                 buffer.unmap();
             });
 
-        gpu.device.poll(wgpu::MaintainBase::Wait);
+        gpu.device.poll(wgpu::MaintainBase::Wait)?;
 
         let (start, end) = rx.recv().unwrap();
 
         let timestamp_period = gpu.queue.get_timestamp_period() as f64;
         let nanoseconds = (end - start) as f64 * timestamp_period;
 
-        Duration::from_nanos(nanoseconds as u64)
+        Ok(Duration::from_nanos(nanoseconds as u64))
     }
 }
