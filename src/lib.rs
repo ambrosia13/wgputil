@@ -43,6 +43,10 @@ pub struct GpuHandle {
 pub struct FrameRecord {
     pub encoder: wgpu::CommandEncoder,
     pub surface_texture: wgpu::SurfaceTexture,
+
+    /// For convenience and possibly efficiency, a singular view for those that
+    /// can use the default texture view configuration.
+    pub surface_texture_view: wgpu::TextureView,
 }
 
 pub struct SurfaceState {
@@ -151,10 +155,12 @@ impl SurfaceState {
             });
 
         let surface_texture = self.surface.get_current_texture()?;
+        let surface_texture_view = surface_texture.texture.create_view(&Default::default());
 
         Ok(FrameRecord {
             encoder,
             surface_texture,
+            surface_texture_view,
         })
     }
 
