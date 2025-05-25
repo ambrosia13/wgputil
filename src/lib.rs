@@ -21,6 +21,9 @@ pub enum Error {
 
     #[error("wgpu error: {0}")]
     Wgpu(#[from] wgpu::Error),
+
+    #[error("wgpu poll error: {0}")]
+    WgpuPoll(#[from] wgpu::PollError),
 }
 
 #[derive(Error, Debug)]
