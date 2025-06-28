@@ -173,3 +173,17 @@ pub fn create(device: &wgpu::Device, source: &ShaderSource) -> Result<wgpu::Shad
 
     Ok(module)
 }
+
+/// Attempts to create the shader module, and if it fails, automatically creates a fallback shader.
+pub fn create_or_fallback(
+    device: &wgpu::Device,
+    source: &mut ShaderSource,
+) -> (wgpu::ShaderModule, Option<Error>) {
+    match create(device, source) {
+        Ok(s) => (s, None),
+        Err(e) => {
+            source.make_fallback();
+            (create(device, source).unwrap(), Some(e))
+        }
+    }
+}
