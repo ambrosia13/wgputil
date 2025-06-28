@@ -13,6 +13,11 @@ pub enum ShaderBackend {
     Spirv,
 }
 
+enum ShaderModuleDescriptor<'a> {
+    Wgsl(wgpu::ShaderModuleDescriptor<'a>),
+    Passthrough(wgpu::ShaderModuleDescriptorPassthrough<'a>),
+}
+
 struct ShaderMetadata {
     pub name: String,
     pub path: PathBuf,
@@ -102,22 +107,31 @@ impl ShaderSource {
         }
     }
 
-    fn descriptor(&self) -> wgpu::ShaderModuleDescriptor {
+    fn descriptor(&self) -> ShaderModuleDescriptor {
         match self.is_fallback() {
             false => match self.backend() {
                 ShaderBackend::Wgsl => {
                     let source_str = self.source_str();
 
-                    wgpu::ShaderModuleDescriptor {
+                    ShaderModuleDescriptor::Wgsl(wgpu::ShaderModuleDescriptor {
                         label: Some(&self.metadata.name),
                         source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(source_str.unwrap())),
-                    }
+                    })
                 }
                 ShaderBackend::Spirv => {
-                    todo!()
+                    let source_words = self.source_words();
+
+                    ShaderModuleDescriptor::Passthrough(
+                        wgpu::ShaderModuleDescriptorPassthrough::SpirV(
+                            wgpu::ShaderModuleDescriptorSpirV {
+                                label: Some(&self.metadata.name),
+                                source: source_words.unwrap(),
+                            },
+                        ),
+                    )
                 }
             },
-            true => self.fallback_descriptor(),
+            true => ShaderModuleDescriptor::Wgsl(self.fallback_descriptor()),
         }
     }
 
@@ -139,12 +153,23 @@ impl ShaderSource {
 pub fn create(device: &wgpu::Device, source: &ShaderSource) -> Result<wgpu::ShaderModule, Error> {
     device.push_error_scope(wgpu::ErrorFilter::Validation);
 
-    let module = device.create_shader_module(source.descriptor());
+    let module = match source.descriptor() {
+        ShaderModuleDescriptor::Wgsl(desc) => {
+            let module = device.create_shader_module(desc);
 
-    let compile_error = pollster::block_on(device.pop_error_scope());
-    if let Some(error) = compile_error {
-        return Err(error.into());
-    }
+            // Error check only for wgsl, because passthrough shaders will not generate wgpu-level errors
+            // instead, they will crash the driver or similar
+            let compile_error = pollster::block_on(device.pop_error_scope());
+            if let Some(error) = compile_error {
+                return Err(error.into());
+            }
+
+            module
+        }
+        ShaderModuleDescriptor::Passthrough(desc) => unsafe {
+            device.create_shader_module_passthrough(desc)
+        },
+    };
 
     Ok(module)
 }
