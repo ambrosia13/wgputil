@@ -126,7 +126,7 @@ impl TimeQuery {
                 buffer.unmap();
             });
 
-        gpu.device.poll(wgpu::MaintainBase::Wait)?;
+        gpu.device.poll(wgpu::PollType::Wait)?;
 
         let (start, end) = rx.recv().unwrap();
 
