@@ -111,7 +111,12 @@ impl SurfaceState {
             format: surface_format,
             width: viewport_size.width,
             height: viewport_size.height,
-            present_mode: wgpu::PresentMode::Fifo,
+            present_mode: surface_caps
+                .present_modes
+                .iter()
+                .copied()
+                .find(|p| *p == wgpu::PresentMode::Mailbox)
+                .unwrap_or(wgpu::PresentMode::AutoVsync),
             alpha_mode: surface_caps.alpha_modes[0],
             desired_maximum_frame_latency: 2,
             view_formats: vec![],
